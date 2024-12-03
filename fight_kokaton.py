@@ -171,6 +171,10 @@ class Explosion:
     爆発エフェクト発生関数
     """
     def __init__(self, bomb:"Bomb"):
+        """
+        爆発エフェクトの初期設定関数
+        引数 bomb : Bombインスタンス
+        """
         self.img_lst = []
         img = pg.image.load("fig/explosion.gif")  # 通常の爆発エフェクト画像
         self.img_lst.append(img)
@@ -181,6 +185,10 @@ class Explosion:
         self.life = 70  # 表示時間
         
     def update(self, screen:pg.Surface):
+        """
+        表示時間を計算し、条件を満たせば描画する関数
+        引数 screen : 画面Surface
+        """
         self.life -= 1
         if self.life > 0:
             screen.blit(self.img_lst[self.life%2], self.rct)
@@ -200,6 +208,7 @@ def main():
     exp = None
     clock = pg.time.Clock()
     tmr = 0
+
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -220,6 +229,7 @@ def main():
                 pg.display.update()
                 time.sleep(1)
                 return
+
         for i, bomb in enumerate(bombs):
             for j, beam in enumerate(beams):
                 if beam is not None:    
@@ -231,6 +241,7 @@ def main():
                         exp = Explosion(bomb)  # explosionインスタンスの作成
                         exps.append(exp)
                         pg.display.update()
+
         score.update(screen)  # スコアの描画
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
