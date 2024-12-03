@@ -248,7 +248,7 @@ def main():
         beams = [beam for beam in beams if beam is not None]  # beamsからNoneを取り除く
         bombs = [bomb for bomb in bombs if bomb is not None]
         exps = [exp for exp in exps if exp.life>0]
-        if exp is not None:
+        for exp in exps:
             exp.update(screen)
         for bomb in bombs:
             bomb.update(screen)
