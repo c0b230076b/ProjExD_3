@@ -172,6 +172,7 @@ def main():
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bird = Bird((300, 200))
     bomb = Bomb((255, 0, 0), 10)
+    beams = []  # 複数のビームインスタンスを入れるリスト
     beam = None  # ビームインスタンス生成
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]  # BombインスタンスをNUM_OF_BOMBS回作成し、bombsリストに入れる
     score = Score()
@@ -183,7 +184,8 @@ def main():
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 # スペースキー押下でBeamクラスのインスタンス生成
-                beam = Beam(bird)            
+                beam = Beam(bird)
+                beams.append(beam)       
         screen.blit(bg_img, [0, 0])
         
         for bomb in bombs:
@@ -197,21 +199,26 @@ def main():
                 time.sleep(1)
                 return
         for i, bomb in enumerate(bombs):
-            if beam is not None:    
-                if beam.rct.colliderect(bomb.rct):  # ビームが爆弾を撃ち落としたら
-                    beam = None
-                    bombs[i] = None
-                    bird.change_img(6, screen)
-                    score.score += 1
-                    pg.display.update()
+            for j, beam in enumerate(beams):
+                if beam is not None:    
+                    if beam.rct.colliderect(bomb.rct):  # ビームが爆弾を撃ち落としたら
+                        beams[j] = None
+                        bombs[i] = None
+                        bird.change_img(6, screen)
+                        score.score += 1
+                        pg.display.update()
         score.update(screen)  # スコアの描画
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
+        beams = [beam for beam in beams if beam is not None]  # beamsからNoneを取り除く
         bombs = [bomb for bomb in bombs if bomb is not None]
         for bomb in bombs:
             bomb.update(screen)
-        if beam is not None:
+        for i, beam in enumerate (beams):
+            if check_bound(beam.rct) != (True, True):  # 画面内でなければそのbeamをbeamsからpop
+                beams.pop(i)
             beam.update(screen)
+        # print(len(beams))  # beamsの中身確認
         pg.display.update()
         tmr += 1
         clock.tick(50)
