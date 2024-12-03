@@ -166,6 +166,26 @@ class Score:
         screen.blit(self.img, self.rct)
 
 
+class Explosion:
+    """
+    爆発エフェクト発生関数
+    """
+    def __init__(self, bomb:"Bomb"):
+        self.img_lst = []
+        img = pg.image.load("fig/explosion.gif")  # 通常の爆発エフェクト画像
+        self.img_lst.append(img)
+        flip_img = pg.transform.flip(pg.image.load("fig/explosion.gif"), True, True)  # 上下左右反転した爆発エフェクト画像
+        self.img_lst.append(flip_img)
+        self.rct = img.get_rect()
+        self.rct.center = bomb.rct.center  # 爆発した爆弾の座標を取得
+        self.life = 70  # 表示時間
+        
+    def update(self, screen:pg.Surface):
+        self.life -= 1
+        if self.life > 0:
+            screen.blit(self.img_lst[self.life%2], self.rct)
+
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
@@ -176,6 +196,8 @@ def main():
     beam = None  # ビームインスタンス生成
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]  # BombインスタンスをNUM_OF_BOMBS回作成し、bombsリストに入れる
     score = Score()
+    exps = []  # explosionインスタンス用の空リスト
+    exp = None
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -206,12 +228,17 @@ def main():
                         bombs[i] = None
                         bird.change_img(6, screen)
                         score.score += 1
+                        exp = Explosion(bomb)  # explosionインスタンスの作成
+                        exps.append(exp)
                         pg.display.update()
         score.update(screen)  # スコアの描画
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
         beams = [beam for beam in beams if beam is not None]  # beamsからNoneを取り除く
         bombs = [bomb for bomb in bombs if bomb is not None]
+        exps = [exp for exp in exps if exp.life>0]
+        if exp is not None:
+            exp.update(screen)
         for bomb in bombs:
             bomb.update(screen)
         for i, beam in enumerate (beams):
